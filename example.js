@@ -8,7 +8,7 @@ const context = [];
 
 rl.on("line", async line => {
     try {
-        const response = await cb(line, context);
+        const response = await cb(line, context, undefined, process.env.PROXY_URL);
         context.push(line);
         context.push(response);
         console.log(response);

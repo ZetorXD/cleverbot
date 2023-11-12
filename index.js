@@ -1,6 +1,8 @@
 const superagent = require("superagent");
 const md5 = require("md5");
 
+require("superagent-proxy")(superagent);
+
 const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36";
 
 let cookies;
@@ -14,15 +16,16 @@ let lastCookieUpdate = 0;
  * @param {string} stimulus The message to be sent
  * @param {string[]?} context An array of previous messages and responses
  * @param {string?} language The language of the message (null for auto detect)
+ * @param {string?} proxy The url of proxy
  * @returns {Promise<string>} The response
  */
-module.exports = async (stimulus, context = [], language) => {
+module.exports = async (stimulus, context = [], language, proxy) => {
     const _context = context.slice(); // clone array to prevent subsequent calls from modifying it
 
     if (cookies == null || Date.now() - lastCookieUpdate >= 86400000) {
         // we must get the XVIS cookie before we can make requests to the API
         const date = new Date();
-        const req = await superagent.get(`https://www.cleverbot.com/extras/conversation-social-min.js?${date.getFullYear()}${date.getMonth().toString().padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}`).set("User-Agent", userAgent);
+        const req = await superagent.get(`https://www.cleverbot.com/extras/conversation-social-min.js?${date.getFullYear()}${date.getMonth().toString().padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}`).set("User-Agent", userAgent).proxy(proxy);
         cookies = req.header["set-cookie"]; // eslint-disable-line require-atomic-updates
         lastCookieUpdate = Date.now();
     }
@@ -52,7 +55,8 @@ module.exports = async (stimulus, context = [], language) => {
                 .set("Cookie", `${cookies[0].split(";")[0]}; _cbsid=-1`)
                 .set("User-Agent", userAgent)
                 .type("text/plain")
-                .send(payload);
+                .send(payload)
+                .proxy(proxy);
 
             cbsid = req.text.split("\r")[1];
             xai = `${cbsid.substring(0, 3)},${req.text.split("\r")[2]}`;
