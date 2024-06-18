@@ -1,5 +1,5 @@
 {
-  "name": "@kasefuchs/cleverbot-free-proxy",
+  "name": "@ZetorXD/cleverbot-free-proxy",
   "version": "2.0.1",
   "description": "Simple package to interact with the same API that the Cleverbot website uses for free.",
   "main": "index.js",
